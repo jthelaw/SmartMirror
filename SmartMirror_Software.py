@@ -8,8 +8,8 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import QTimer
 
 # Spotify credentials
-SPOTIPY_CLIENT_ID = 'your_client_id'
-SPOTIPY_CLIENT_SECRET = 'your_client_secret'
+SPOTIPY_CLIENT_ID = 'your id'
+SPOTIPY_CLIENT_SECRET = 'your secret'
 SPOTIPY_REDIRECT_URI = 'http://localhost:8000/callback'
 
 
