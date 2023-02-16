@@ -25,4 +25,14 @@ class SmartMirror:
         self.window = QWidget()
         self.window.setWindowTitle('Smart Mirror')
         self.window.setGeometry(200, 200, 600, 400)
+
+        #Labels for the weather 
+        self.weather_label = QLabel(self.window)
+        self.weather_label.move(50, 50)
+        self.weather_label.setFont(QFont('Arial', 20))
+
+        #Label for current song(track)
+        self.track_label = QLabel
+
+
                
