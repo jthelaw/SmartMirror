@@ -54,7 +54,47 @@ class SmartMirror:
         track = self.get_current_track()
         self.track_label.setText(track)
 
-        
+        # Schedule the next GUI update in 5 secs
+        QTimer.singleShot(5000,self.update_gui)
+
+    def get_weather(self):
+        # Make a request to the OpenWeatherMap API
+        weather_api_key = '08c62c95f2bcce8be869936907a2978c'
+        weather_url = f'http://api.openweathermap.org/data/2.5/weather?q=New%20York&appid={weather_api_key}&units=metric'
+        response = requests.get(weather_url)
+        data = json.loads(response.text)
+
+        # Extract the relevant data from the response
+        weather_data = {
+            'temp': int(data['main']['temp']),
+            'description': data['weather'][0]['description']
+        }
+
+        return weather_data
+    
+    def get_current_track(self):
+        # Get the user's currently playing track from Spotify
+        track = self.sp.current_playback()
+        if track is None:
+            return 'No track currently playing'
+        else:
+            track_name = track['item']['name']
+            track_artist = track['item']['artists'][0]['name']
+            return f'Now playing: {track_name} by {track_artist}'
+
+    def spotify_play_pause(self):
+        # Play/pause the user's Spotify account
+        track = self.sp.current_playback()
+        if track is None:
+            self.sp.start_playback()
+            self.play_button.setText('Pause')
+        else:
+            self.sp.pause_playback()
+            self.play_button.setText('Play')
+
+if __name__ == '__main__':
+    SmartMirror()
+
 
     
 
