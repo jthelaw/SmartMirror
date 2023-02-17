@@ -32,7 +32,10 @@ class SmartMirror:
         self.weather_label.setFont(QFont('Arial', 20))
 
         #Label for current song(track)
-        self.track_label = QLabel
+        self.track_label = QLabel(self.window)
+        self.track_label.move(50,100)
+        self.track_label.setFont(QFont('Arial', 20))
+        
 
 
                
