@@ -40,7 +40,18 @@ class SmartMirror:
         self.play_button = QPushButton('Play', self.window)
         self.play_button.move(50,150)
         self.play_button.clicked.connect(self.spotify_play_pause)
+
+        # Start event loop
+        self.update_gui()
+        self.window.show()
+        self.exit(self.app.exec_())
+
+    def update_gui(self):
+        #updateing weather and current track labels
+        weather = self.get_weather()
         
+    
+
 
 
 
