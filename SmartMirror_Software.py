@@ -35,7 +35,13 @@ class SmartMirror:
         self.track_label = QLabel(self.window)
         self.track_label.move(50,100)
         self.track_label.setFont(QFont('Arial', 20))
+
+        #Play/Pause button 
+        self.play_button = QPushButton('Play', self.window)
+        self.play_button.move(50,150)
+        self.play_button.clicked.connect(self.spotify_play_pause)
         
+
 
 
                
