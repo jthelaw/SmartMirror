@@ -49,7 +49,13 @@ class SmartMirror:
     def update_gui(self):
         #updateing weather and current track labels
         weather = self.get_weather()
+        self.weather_label.setText(f'Temperature: {weather["temp"]}°C\nDescription: {weather["description"]}')
+
+        track = self.get_current_track()
+        self.track_label.setText(track)
+
         
+
     
 
 
