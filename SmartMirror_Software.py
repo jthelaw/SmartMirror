@@ -9,7 +9,7 @@ from PyQt5.QtCore import QTimer
 import tkinter as tk
 
 # Spotify credentials
-SPOTIPY_CLIENT_ID = 'your CLIENT_ID '
+SPOTIPY_CLIENT_ID = 'your CLIENT_ID'
 SPOTIPY_CLIENT_SECRET = 'Your CLIENT_SECRET'
 SPOTIPY_REDIRECT_URI = 'http://localhost:8000/callback'
 
@@ -39,16 +39,30 @@ class SmartMirror:
         self.track_label.move(1, 100)
         self.track_label.setFont(QFont('Arial', 20))
 
-         # Add separate buttons for play and pause
+         # Add separate buttons for play 
         self.play_button = QPushButton(self.window)
-        self.play_button.setIcon(QIcon('play.png'))
+        self.play_button.setIcon(QIcon('Images/play.png'))
         self.play_button.move(50, 150)
         self.play_button.clicked.connect(self.spotify_play)
 
+        # Add separate buttons for pause
         self.pause_button = QPushButton(self.window)
-        self.pause_button.setIcon(QIcon('pause.png'))
-        self.pause_button.move(150, 150)
+        self.pause_button.setIcon(QIcon('Images/pause.png'))
+        self.pause_button.move(100, 150)
         self.pause_button.clicked.connect(self.spotify_pause)
+
+        # Adding skip button
+        self.skip_button = QPushButton(self.window)
+        self.skip_button.setIcon(QIcon('Images/skip_forward.png'))
+        self.skip_button.move(150, 150)
+        self.skip_button.clicked.connect(self.spotify_skip_forward)
+
+        # Adding Previous track button
+        self.previous_button = QPushButton(self.window)
+        self.previous_button.setIcon(QIcon('Images/skip_back.png'))
+        self.previous_button.move(0, 150)
+        self.previous_button.clicked.connect(self.spotify_skip_back)
+
 
 
         #search button
@@ -61,7 +75,13 @@ class SmartMirror:
         self.window.show()
         sys.exit(self.app.exec_())
     
-    
+    def spotify_skip_back(self):
+        self.sp.previous_track()
+        self.update_track_info()
+
+    def spotify_skip_forward(self):
+        self.sp.next_track()
+        self.update_track_info()
 
     def update_gui(self):
         # Update the weather and current track labels
@@ -99,6 +119,7 @@ class SmartMirror:
             track_name = track['item']['name']
             track_artist = track['item']['artists'][0]['name']
             return f'Now playing: {track_name} by {track_artist}'
+    
 
     def spotify_play(self):
         # Play the user's Spotify account
@@ -145,6 +166,7 @@ class SmartMirror:
 if __name__ == '__main__':
     SmartMirror()
     
+
 
 
 
