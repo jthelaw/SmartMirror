@@ -64,7 +64,6 @@ class SmartMirror:
         self.previous_button.clicked.connect(self.spotify_skip_back)
 
 
-
         #search button
         self.search_button = QPushButton('Search', self.window)
         self.search_button.move(200, 150)
@@ -118,20 +117,24 @@ class SmartMirror:
         else:
             track_name = track['item']['name']
             track_artist = track['item']['artists'][0]['name']
-            return f'Now playing: {track_name} by {track_artist}'
+            return f'{track_name} by {track_artist}'
     
+    def update_track_info(self):
+        track = self.get_current_track()
+        if track is not None and 'item' in track and 'name' in track['item']:
+            track_name = track['item']['name']
+            artist_name = track['item']['artists'][0]['name']
+            self.track_label.setText(f"{track_name} - {artist_name}")
 
     def spotify_play(self):
         # Play the user's Spotify account
         self.sp.start_playback()
-        self.play_button.hide()
-        self.pause_button.show()
+
     
     def spotify_pause(self):
         # Pause the user's Spotify account
         self.sp.pause_playback()
-        self.pause_button.hide()
-        self.play_button.show()
+
     
     def search_spotify(self):
     # Get the user's liked songs from Spotify
@@ -157,7 +160,7 @@ class SmartMirror:
             if search_results['tracks']['items']:
                 track_uri = search_results['tracks']['items'][0]['uri']
                 self.sp.start_playback(uris=[track_uri])
-                self.track_label.setText(f'Now playing: {search_results["tracks"]["items"][0]["name"]} by {search_results["tracks"]["items"][0]["artists"][0]["name"]}')
+                self.track_label.setText(f'{search_results["tracks"]["items"][0]["name"]} by {search_results["tracks"]["items"][0]["artists"][0]["name"]}')
                 self.play_button.setText('Pause')
             else:
                 QMessageBox.warning(self.window, 'Song not found', 'Sorry, the song could not be found.')
