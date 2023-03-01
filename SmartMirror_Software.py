@@ -3,14 +3,14 @@ import requests
 import json
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from PyQt5.QtWidgets import  QApplication, QLabel, QPushButton, QWidget, QInputDialog, QMessageBox
-from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import  QApplication, QLabel, QPushButton, QWidget, QInputDialog, QMessageBox, QSizePolicy
+from PyQt5.QtGui import QFont, QIcon,QPixmap
+from PyQt5.QtCore import QTimer, Qt
 import tkinter as tk
 
 # Spotify credentials
-SPOTIPY_CLIENT_ID = 'your CLIENT_ID'
-SPOTIPY_CLIENT_SECRET = 'Your CLIENT_SECRET'
+SPOTIPY_CLIENT_ID = 'Your Client ID'
+SPOTIPY_CLIENT_SECRET = 'Your Client Secret'
 SPOTIPY_REDIRECT_URI = 'http://localhost:8000/callback'
 
 
@@ -28,7 +28,7 @@ class SmartMirror:
         self.app = QApplication(sys.argv)
         self.window = QWidget()
         self.window.setWindowTitle('Smart Mirror')
-        self.window.setGeometry(200, 200, 600, 400)
+        self.window.setGeometry(200, 200, 900, 900)
 
         # Create labels for the weather and current track
         self.weather_label = QLabel(self.window)
@@ -36,37 +36,48 @@ class SmartMirror:
         self.weather_label.setStyleSheet('color: black;')
         
         self.track_label = QLabel(self.window)
-        self.track_label.move(1, 100)
+        self.track_label.move(1, 60)
         self.track_label.setFont(QFont('Arial', 20))
+        self.track_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        font = self.track_label.font()
+        font.setPointSize(18)
+        self.track_label.setFont(font)
+        self.track_label.setWordWrap(False)
 
-         # Add separate buttons for play 
+        # Add separate buttons for play 
         self.play_button = QPushButton(self.window)
         self.play_button.setIcon(QIcon('Images/play.png'))
-        self.play_button.move(50, 150)
+        self.play_button.move(50, 100)
         self.play_button.clicked.connect(self.spotify_play)
 
         # Add separate buttons for pause
         self.pause_button = QPushButton(self.window)
         self.pause_button.setIcon(QIcon('Images/pause.png'))
-        self.pause_button.move(100, 150)
+        self.pause_button.move(100, 100)
         self.pause_button.clicked.connect(self.spotify_pause)
 
         # Adding skip button
         self.skip_button = QPushButton(self.window)
         self.skip_button.setIcon(QIcon('Images/skip_forward.png'))
-        self.skip_button.move(150, 150)
+        self.skip_button.move(150, 100)
         self.skip_button.clicked.connect(self.spotify_skip_forward)
 
         # Adding Previous track button
         self.previous_button = QPushButton(self.window)
         self.previous_button.setIcon(QIcon('Images/skip_back.png'))
-        self.previous_button.move(0, 150)
+        self.previous_button.move(0, 100)
         self.previous_button.clicked.connect(self.spotify_skip_back)
+
+        #Creating album art instance variable
+        self.album_art_label = QLabel(self.window)
+        self.album_art_label.setGeometry(0, 150, 800, 800)
+        self.album_art_label.setMaximumSize(200, 200)  # Set maximum size to 200x200 pixels
+        self.album_art_label.setAlignment(Qt.AlignCenter)  # Center the image within the label
 
 
         #search button
         self.search_button = QPushButton('Search', self.window)
-        self.search_button.move(200, 150)
+        self.search_button.move(200, 100)
         self.search_button.clicked.connect(self.search_spotify)
 
         # Start the event loop
@@ -83,12 +94,27 @@ class SmartMirror:
         self.update_track_info()
 
     def update_gui(self):
-        # Update the weather and current track labels
+        # Update the weather label
         weather = self.get_weather()
-        self.weather_label.setText(f'Temperature: {weather["temp"]}°C\n{weather["description"]}')
+        self.weather_label.setText(f'Temperature: {weather["temp"]}°F\n{weather["description"]}')
 
+        # Get the current track
         track = self.get_current_track()
-        self.track_label.setText(track)
+        if track:
+            track_name = track['item']['name']
+            artist_name = track['item']['artists'][0]['name']
+            album_name = track['item']['album']['name']
+            album_art_url = track['item']['album']['images'][0]['url']
+
+            # Set the track label text
+            track = f"{track_name} - {artist_name} ({album_name})"
+            self.track_label.setText(track)
+
+            # Load the album art image and set it as the pixmap for the album art label
+            album_art_data = requests.get(album_art_url)
+            album_art_pixmap = QPixmap()
+            album_art_pixmap.loadFromData(album_art_data.content)
+            self.album_art_label.setPixmap(album_art_pixmap)
 
         # Schedule the next GUI update in 5 seconds
         QTimer.singleShot(5000, self.update_gui)
@@ -96,8 +122,8 @@ class SmartMirror:
     def get_weather(self):
         # Make a request to the Weatherbit API
         location = 'Burnsville,MN'
-        api_key = 'Your api_key'
-        weather_url = f'https://api.weatherbit.io/v2.0/current?city={location}&key={api_key}&units=M'
+        api_key = 'Your API key'
+        weather_url = f'https://api.weatherbit.io/v2.0/current?city={location}&key={api_key}&units=I'
         response = requests.get(weather_url)
         data = json.loads(response.text)
 
@@ -110,14 +136,18 @@ class SmartMirror:
         return weather_data
     
     def get_current_track(self):
-        # Get the user's currently playing track from Spotify
-        track = self.sp.current_playback()
-        if track is None:
-            return 'No track currently playing'
-        else:
-            track_name = track['item']['name']
-            track_artist = track['item']['artists'][0]['name']
-            return f'{track_name} by {track_artist}'
+        try:
+            # Get the current track's data from the Spotify API
+            track_data = self.sp.current_playback()
+
+            # Return the track data if a track is currently playing
+            if track_data and track_data['is_playing']:
+                return track_data
+            else:
+                return None
+        except spotipy.exceptions.SpotifyException as e:
+            print(f"Error getting current track: {e}")
+            return None
     
     def update_track_info(self):
         track = self.get_current_track()
